@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/design_default_color_primary</item>
+        <item name="colorPrimaryDark">@color/design_default_color_primary_dark</item>
+        <item name="colorPrimaryVariant">@color/blue</item>
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+
+    <style name="Theme.ProjetoAppAgua" parent="Base.Theme.ProjetoAppAgua" />
+</resources>
