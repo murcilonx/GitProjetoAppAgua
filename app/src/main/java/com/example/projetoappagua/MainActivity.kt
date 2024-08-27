@@ -3,7 +3,10 @@
 package com.example.projetoappagua
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -48,7 +51,7 @@ class MainActivity : AppCompatActivity() {
     private var minutosAtuais = 0
 
 
-    @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded")
+    @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded", "ScheduleExactAlarm")
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -135,10 +138,18 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
 
                     if (intent.resolveActivity(packageManager) != null){
-                        startActivity(intent)
+                        val alarmIntent = Intent(this, AlarmReceiver::class.java)
+                        val pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-                        val flashlightIntent = Intent(this, FlashlightService::class.java)
-                        startService(flashlightIntent)
+                        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                        val calendar = Calendar.getInstance().apply {
+                            set(Calendar.HOUR_OF_DAY, txt_hora.text.toString().toInt())
+                            set(Calendar.MINUTE, txt_minutos.text.toString().toInt())
+                            set(Calendar.SECOND, 0)
+                        }
+                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+
+
                     }
 
             }

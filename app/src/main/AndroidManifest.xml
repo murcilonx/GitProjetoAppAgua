@@ -14,6 +14,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera.flash" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+
 
 
 
@@ -29,6 +31,9 @@
         tools:targetApi="31">
 
         <service android:name=".FlashlightService" />
+        <receiver android:name=".AlarmReceiver" android:exported="true"
+            android:permission="TODO" />
+
 
 
         <activity
