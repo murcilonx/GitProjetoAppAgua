@@ -3,13 +3,8 @@
 package com.example.projetoappagua
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.app.TimePickerDialog
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.provider.AlarmClock
 import android.widget.Button
@@ -51,13 +46,8 @@ class MainActivity : AppCompatActivity() {
     private var minutosAtuais = 0
 
 
-    @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded", "ScheduleExactAlarm")
+    @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded")
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
-            }
-        }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -91,12 +81,12 @@ class MainActivity : AppCompatActivity() {
             val alertDialog = AlertDialog.Builder(this)
             alertDialog.setTitle(R.string.dialog_titulo)
                 .setMessage(R.string.dialog_desc)
-                    .setPositiveButton("OK") { dialogInterface, i ->
-                        edit_peso.setText("")
-                        edit_idade.setText("")
-                        txt_resultado_ml.text = ""
+                .setPositiveButton("OK") { dialogInterface, i ->
+                    edit_peso.setText("")
+                    edit_idade.setText("")
+                    txt_resultado_ml.text = ""
 
-                    }
+                }
 
             alertDialog.setNegativeButton("Cancelar") { dialogInterface, i ->
 
@@ -121,7 +111,6 @@ class MainActivity : AppCompatActivity() {
                 currentTime.set(Calendar.MINUTE, minutes)
                 currentTime.set(Calendar.SECOND, 0)
 
-
             },horaAtual,minutosAtuais,true)
             timePickerDialog.show()
 
@@ -137,38 +126,15 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra(AlarmClock.EXTRA_MESSAGE, getString(R.string.alarme_mensagem))
                 startActivity(intent)
 
+                if (intent.resolveActivity(packageManager) != null){
+                    startActivity(intent)
+                }
+
             }
-
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-            // Intent para iniciar a lanterna
-            val startIntent = Intent(this, AlarmReceiver::class.java).apply {
-                action = "com.example.projetoappagua.START_FLASHLIGHT"
-            }
-            val startPendingIntent = PendingIntent.getBroadcast(this, 0, startIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-            // Intent para parar a lanterna
-            val stopIntent = Intent(this, AlarmReceiver::class.java).apply {
-                action = "com.example.projetoappagua.STOP_FLASHLIGHT"
-            }
-            val stopPendingIntent = PendingIntent.getBroadcast(this, 1, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-            // Configurar o alarme para acionar o início da lanterna
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendario.timeInMillis, startPendingIntent)
-
-            // Configurar o alarme para parar a lanterna depois de um tempo (por exemplo, 10 minutos)
-            val stopTime = calendario.timeInMillis + 10 * 60 * 1000 // 10 minutos depois
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, stopTime, stopPendingIntent)
-
-
 
         }
 
-
-
-
     }
-
 
 
     @SuppressLint("CutPasteId")
