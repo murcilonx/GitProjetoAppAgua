@@ -1,9 +1,14 @@
 package com.example.projetoappagua
 
+import NotificationReceiver
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.provider.AlarmClock
 import android.widget.Button
 import android.widget.EditText
@@ -20,6 +25,7 @@ import com.example.projetoappagua.model.CalcularIngestaoDiaria
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -106,6 +112,28 @@ class MainActivity : AppCompatActivity() {
                 txt_hora.text = String.format("%02d" , hourOfDay)
                 txt_minutos.text = String.format("%02d", minutes)
 
+             //Calculo para agendar as notificações prévias ao alarme
+
+                val currentTime = Calendar.getInstance()
+                currentTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                currentTime.set(Calendar.MINUTE, minutes)
+                currentTime.set(Calendar.SECOND, 0)
+
+                val alarmTimeMillis = currentTime.timeInMillis
+                val delayMillis = alarmTimeMillis - System.currentTimeMillis()
+
+
+            //Agendar notificações
+
+            if (delayMillis > 0){
+                scheduleNotification(this, 5*60*1000) //5 minutos
+                scheduleNotification(this, 10*60*1000) //10 minutos
+                scheduleNotification(this, 15*60*1000) //15 minutos
+                scheduleNotification(this, 30*60*1000) //30 minutos
+            } else{
+                Toast.makeText(this, "A hora definida ja passou", Toast.LENGTH_SHORT).show()
+            }
+
             },horaAtual,minutosAtuais,true)
             timePickerDialog.show()
 
@@ -131,8 +159,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun scheduleNotification(context: Context, delayMillis: Long) {
+        val intent = Intent(context, NotificationReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val triggerAtMillis = SystemClock.elapsedRealtime() + delayMillis
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent)
+
+    }
+
     @SuppressLint("CutPasteId")
-    private fun IniciarComponentes(){
+    fun IniciarComponentes(){
         edit_peso = findViewById(R.id.edit_peso)
         edit_idade = findViewById(R.id.edit_idade)
         bt_calcular = findViewById(R.id.bt_calcular)
