@@ -1,9 +1,12 @@
-@file:Suppress("FunctionName", "unused")
+@file:Suppress("FunctionName", "unused", "RedundantSuppression")
 
 package com.example.projetoappagua
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.AlarmClock
@@ -20,12 +23,6 @@ import com.example.projetoappagua.model.CalcularIngestaoDiaria
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
-import android.app.PendingIntent
-import android.app.AlarmManager
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import android.content.Context
-
 
 @Suppress(
     "PrivatePropertyName"
@@ -50,39 +47,38 @@ class MainActivity : AppCompatActivity() {
     private var horaAtual = 0
     private var minutosAtuais = 0
 
-
     @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded", "ScheduleExactAlarm")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-
-        //supportActionBar!!.hide() -> crash do aplicativo
-
         IniciarComponentes()
         calcular_Ingestao_Diaria = CalcularIngestaoDiaria()
 
-        bt_calcular.setOnClickListener{
-            if(edit_peso.text.toString().isEmpty()){
-                Toast.makeText(this,R.string.toast_informe_peso,Toast.LENGTH_SHORT).show()
-            }else if (edit_idade.text.toString().isEmpty()){
-                Toast.makeText(this,R.string.toast_informe_idade,Toast.LENGTH_SHORT).show()
-
-            }else{
+        bt_calcular.setOnClickListener {
+            if (edit_peso.text.toString().isEmpty()) {
+                Toast.makeText(this, R.string.toast_informe_peso, Toast.LENGTH_SHORT).show()
+            } else if (edit_idade.text.toString().isEmpty()) {
+                Toast.makeText(this, R.string.toast_informe_idade, Toast.LENGTH_SHORT).show()
+            } else {
                 val peso = edit_peso.text.toString().toDouble()
                 val idade = edit_idade.text.toString().toInt()
-                calcular_Ingestao_Diaria.CalcularTotalMl(peso,idade)
+                calcular_Ingestao_Diaria.CalcularTotalMl(peso, idade)
                 resultadoMl = calcular_Ingestao_Diaria.ResultadoMl()
-                val formatar = NumberFormat.getNumberInstance(Locale("pt","BR"))
+                val formatar = NumberFormat.getNumberInstance(Locale("pt", "BR"))
                 formatar.isGroupingUsed = false
-                txt_resultado_ml.text = formatar.format(resultadoMl) + " " + "ml"
-            }
+                txt_resultado_ml.text = formatar.format(resultadoMl) + " ml"
 
+                // Salvar a ingestão diária
+                val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                val editor = prefs.edit()
+                editor.putFloat("daily_intake", resultadoMl.toFloat())
+                editor.apply()
+            }
         }
 
-        ic_redefinir_dados.setOnClickListener{
-
+        ic_redefinir_dados.setOnClickListener {
             val alertDialog = AlertDialog.Builder(this)
             alertDialog.setTitle(R.string.dialog_titulo)
                 .setMessage(R.string.dialog_desc)
@@ -91,30 +87,26 @@ class MainActivity : AppCompatActivity() {
                     edit_idade.setText("")
                     txt_resultado_ml.text = ""
 
+                    // Limpar SharedPreferences
+                    val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                    val editor = prefs.edit()
+                    editor.remove("daily_intake")
+                    editor.remove("reminder_time")
+                    editor.apply()
+
                 }
-
-            alertDialog.setNegativeButton("Cancelar") { dialogInterface, i ->
-
-            }
-
+                .setNegativeButton("Cancelar") { dialogInterface, i -> }
             val dialog = alertDialog.create()
             dialog.show()
-
-
         }
 
-        bt_lembrete.setOnClickListener{
+        bt_lembrete.setOnClickListener {
             calendario = Calendar.getInstance()
             horaAtual = calendario.get(Calendar.HOUR_OF_DAY)
             minutosAtuais = calendario.get(Calendar.MINUTE)
-            timePickerDialog = TimePickerDialog(this,{timePicker:TimePicker, hourOfDay: Int, minutes: Int ->
-                txt_hora.text = String.format("%02d" , hourOfDay)
+            timePickerDialog = TimePickerDialog(this, { timePicker: TimePicker, hourOfDay: Int, minutes: Int ->
+                txt_hora.text = String.format("%02d", hourOfDay)
                 txt_minutos.text = String.format("%02d", minutes)
-
-                val currentTime = Calendar.getInstance()
-                currentTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                currentTime.set(Calendar.MINUTE, minutes)
-                currentTime.set(Calendar.SECOND, 0)
 
                 val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
                 val intent = Intent(this, FlashlightReceiver::class.java)
@@ -128,47 +120,32 @@ class MainActivity : AppCompatActivity() {
 
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
 
+                // Salvar o horário do lembrete
+                val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                val editor = prefs.edit()
+                editor.putString("reminder_time", "${String.format("%02d", hourOfDay)}:${String.format("%02d", minutes)}")
+                editor.apply()
 
 
-            },horaAtual,minutosAtuais,true)
+            }, horaAtual, minutosAtuais, true)
             timePickerDialog.show()
-
         }
 
-
-        bt_alarme.setOnClickListener{
-
-            if (txt_hora.text.toString().isNotEmpty() && txt_minutos.text.toString().isNotEmpty()){
+        bt_alarme.setOnClickListener {
+            if (txt_hora.text.toString().isNotEmpty() && txt_minutos.text.toString().isNotEmpty()) {
                 val intent = Intent(AlarmClock.ACTION_SET_ALARM)
                 intent.putExtra(AlarmClock.EXTRA_HOUR, txt_hora.text.toString().toInt())
                 intent.putExtra(AlarmClock.EXTRA_MINUTES, txt_minutos.text.toString().toInt())
                 intent.putExtra(AlarmClock.EXTRA_MESSAGE, getString(R.string.alarme_mensagem))
-                startActivity(intent)
-
-                if (intent.resolveActivity(packageManager) != null){
+                if (intent.resolveActivity(packageManager) != null) {
                     startActivity(intent)
                 }
-
             }
-
         }
-
-        fun updateWidget(context: Context){
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            val componentName = ComponentName(context, WaterWidgetProvider::class.java)
-            val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_text)
-        }
-
-        val prefs = getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putFloat("total_ml", resultadoMl.toFloat()).apply()
-        prefs.edit().putString("reminder_time", "$horaAtual:$minutosAtuais").apply()
-
     }
 
-
     @SuppressLint("CutPasteId")
-    fun IniciarComponentes(){
+    private fun IniciarComponentes() {
         edit_peso = findViewById(R.id.edit_peso)
         edit_idade = findViewById(R.id.edit_idade)
         bt_calcular = findViewById(R.id.bt_calcular)
@@ -178,11 +155,7 @@ class MainActivity : AppCompatActivity() {
         bt_alarme = findViewById(R.id.bt_definir_alarme)
         txt_hora = findViewById(R.id.text_hora)
         txt_minutos = findViewById(R.id.text_minutos)
-
-
-
     }
-
 
 
 }
