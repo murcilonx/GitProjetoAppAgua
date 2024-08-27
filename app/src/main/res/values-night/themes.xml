@@ -1,5 +1,5 @@
 <!--suppress XmlUnboundNsPrefix -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.ProjetoAppAgua" parent="Theme.Material3.DayNight.NoActionBar" tools:keep="@style/Base_Theme_ProjetoAppAgua">
         <!-- Customize your dark theme here. -->

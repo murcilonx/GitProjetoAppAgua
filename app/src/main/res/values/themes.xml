@@ -1,5 +1,5 @@
 <!--suppress ALL, XmlUnboundNsPrefix -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your light theme here. -->
@@ -10,5 +10,5 @@
         <item name="android:windowBackground">@color/white</item>
     </style>
 
-    <style name="Theme.ProjetoAppAgua" parent="Base.Theme.ProjetoAppAgua" tools:keep="@style/Theme_ProjetoAppAgua" />
+   <style name="Theme.ProjetoAppAgua" parent="Base.Theme.ProjetoAppAgua" tools:keep="@style/Theme_ProjetoAppAgua" />
 </resources>
