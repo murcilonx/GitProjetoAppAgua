@@ -20,6 +20,8 @@ import com.example.projetoappagua.model.CalcularIngestaoDiaria
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
+import android.app.PendingIntent
+import android.app.AlarmManager
 
 
 @Suppress(
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var minutosAtuais = 0
 
 
-    @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded")
+    @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded", "ScheduleExactAlarm")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -110,6 +112,20 @@ class MainActivity : AppCompatActivity() {
                 currentTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 currentTime.set(Calendar.MINUTE, minutes)
                 currentTime.set(Calendar.SECOND, 0)
+
+                val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+                val intent = Intent(this, FlashlightReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+                val triggerTime = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    set(Calendar.MINUTE, minutes)
+                    set(Calendar.SECOND, 0)
+                }.timeInMillis
+
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+
+
 
             },horaAtual,minutosAtuais,true)
             timePickerDialog.show()
