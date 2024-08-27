@@ -2,14 +2,8 @@
 
 package com.example.projetoappagua
 
-import NotificationReceiver
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.TimePickerDialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -24,12 +18,10 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import com.example.projetoappagua.model.CalcularIngestaoDiaria
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.random.Random
 
 
 @Suppress(
@@ -126,22 +118,6 @@ class MainActivity : AppCompatActivity() {
                 currentTime.set(Calendar.MINUTE, minutes)
                 currentTime.set(Calendar.SECOND, 0)
 
-                val alarmTimeMillis = currentTime.timeInMillis
-                val delayMillis = alarmTimeMillis - System.currentTimeMillis()
-
-
-            //Agendar notificações
-
-            if (delayMillis > 0){
-
-                val notificationTimes = listOf(5*60*1000L, 10*60*1000L, 15*60*1000L, 30*60*1000L)
-                for (delay in notificationTimes){
-                    scheduleNotification(this, alarmTimeMillis-delay)
-                }
-
-            } else{
-                Toast.makeText(this, "A hora definida ja passou", Toast.LENGTH_SHORT).show()
-            }
 
             },horaAtual,minutosAtuais,true)
             timePickerDialog.show()
@@ -160,55 +136,24 @@ class MainActivity : AppCompatActivity() {
 
                     if (intent.resolveActivity(packageManager) != null){
                         startActivity(intent)
+
+                        val flashlightIntent = Intent(this, FlashlightService::class.java)
+                        startService(flashlightIntent)
                     }
 
             }
 
         }
 
+
+
+
     }
 
-        @SuppressLint("ScheduleExactAlarm", "SuspiciousIndentation")
-        fun scheduleNotification (context: Context, triggerTimeMillis: Long) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notificationId = Random.nextInt(1000)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                val channelId = "default_channel_id"
-                val channelName = "Default Channel"
-                val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
-                notificationManager.createNotificationChannel(channel)
 
-        }
 
-        val notificationBuilder = NotificationCompat.Builder(context, "default_channel_id")
-            .setContentTitle("Lembrete de Hidratação")
-            .setContentText("A hora da hidratação está próxima")
-            .setSmallIcon(R.drawable.bebaagua)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
 
-        val activityIntent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(context, 0, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-            notificationBuilder.setContentIntent(pendingIntent)
-
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val notificationIntent = Intent(context, NotificationReceiver::class.java)
-        val pendingNotificationIntent = PendingIntent.getBroadcast(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
-
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMillis, pendingNotificationIntent)
-    }
-
-    private fun checkPermissions(){
-        if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.TIRAMISU){
-            val notificationPermission = checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-            if (notificationPermission != PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(this, "Permissão de notificações não concedida", Toast.LENGTH_SHORT).show()
-            }
-
-        }
-    }
 
 
     @SuppressLint("CutPasteId")
