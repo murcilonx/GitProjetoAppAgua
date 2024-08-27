@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="@color/blue">
+
+    <TextView
+        android:id="@+id/widget_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ingestão de água"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/widget_reminder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/widget_text"
+        android:text="Próximo lembrete: --:--"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="8dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        tools:ignore="HardcodedText" />
+</RelativeLayout>

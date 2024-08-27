@@ -1,4 +1,4 @@
-@file:Suppress("FunctionName")
+@file:Suppress("FunctionName", "unused")
 
 package com.example.projetoappagua
 
@@ -22,6 +22,9 @@ import java.util.Calendar
 import java.util.Locale
 import android.app.PendingIntent
 import android.app.AlarmManager
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
 
 
 @Suppress(
@@ -149,6 +152,17 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+
+        fun updateWidget(context: Context){
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val componentName = ComponentName(context, WaterWidgetProvider::class.java)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_text)
+        }
+
+        val prefs = getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putFloat("total_ml", resultadoMl.toFloat()).apply()
+        prefs.edit().putString("reminder_time", "$horaAtual:$minutosAtuais").apply()
 
     }
 
