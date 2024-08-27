@@ -1,5 +1,15 @@
+@file:Suppress(
+    "PrivatePropertyName", "FunctionName"
+)
+
 package com.example.projetoappagua.model
 
+@Suppress("PrivatePropertyName", "PrivatePropertyName", "PrivatePropertyName",
+    "PrivatePropertyName", "PrivatePropertyName", "FunctionName", "FunctionName", "FunctionName",
+    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
+    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
+    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression"
+)
 class CalcularIngestaoDiaria {
 
     private val ML_JOVEM = 40.0

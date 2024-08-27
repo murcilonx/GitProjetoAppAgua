@@ -5,7 +5,6 @@ import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.AlarmClock
-import android.renderscript.ScriptGroup.Binding
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -37,12 +36,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var calcular_Ingestao_Diaria: CalcularIngestaoDiaria
     private var resultadoMl = 0.0
 
-    lateinit var timePickerDialog: TimePickerDialog
-    lateinit var calendario: Calendar
-    var horaAtual = 0
-    var minutosAtuais = 0
+    private lateinit var timePickerDialog: TimePickerDialog
+    private lateinit var calendario: Calendar
+    private var horaAtual = 0
+    private var minutosAtuais = 0
 
 
+    @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -81,16 +81,16 @@ class MainActivity : AppCompatActivity() {
             val alertDialog = AlertDialog.Builder(this)
             alertDialog.setTitle(R.string.dialog_titulo)
                 .setMessage(R.string.dialog_desc)
-                    .setPositiveButton("OK",{dialogInterface, i ->
-                    edit_peso.setText("")
-                    edit_idade.setText("")
-                    txt_resultado_ml.text = ""
+                    .setPositiveButton("OK") { dialogInterface, i ->
+                        edit_peso.setText("")
+                        edit_idade.setText("")
+                        txt_resultado_ml.text = ""
 
-               })
+                    }
 
-            alertDialog.setNegativeButton("Cancelar", {dialogInterface, i ->
+            alertDialog.setNegativeButton("Cancelar") { dialogInterface, i ->
 
-            })
+            }
 
             val dialog = alertDialog.create()
             dialog.show()
@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
 
         bt_alarme.setOnClickListener{
 
-            if (!txt_hora.text.toString().isEmpty() && !txt_minutos.text.toString().isEmpty()){
+            if (txt_hora.text.toString().isNotEmpty() && txt_minutos.text.toString().isNotEmpty()){
                 val intent = Intent(AlarmClock.ACTION_SET_ALARM)
                 intent.putExtra(AlarmClock.EXTRA_HOUR, txt_hora.text.toString().toInt())
                 intent.putExtra(AlarmClock.EXTRA_MINUTES, txt_minutos.text.toString().toInt())
