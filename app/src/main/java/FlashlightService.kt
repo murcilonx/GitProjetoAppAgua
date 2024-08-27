@@ -4,8 +4,8 @@ import android.app.Service
 import android.content.Intent
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
-import android.os.IBinder
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 
 class FlashlightService : Service() {
@@ -14,6 +14,7 @@ class FlashlightService : Service() {
     private var cameraId: String? = null
     private val handler = Handler(Looper.getMainLooper())
     private var isFlashing = false
+    private var isServiceActive = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         cameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
@@ -24,7 +25,14 @@ class FlashlightService : Service() {
             e.printStackTrace()
         }
 
-        flashLight()
+        val action = intent?.getStringExtra("ACTION")
+        if (action == "START") {
+            isServiceActive = true
+            flashLight()
+        } else if (action == "STOP") {
+            isServiceActive = false
+            turnOffFlashlight()
+        }
 
         return START_NOT_STICKY
     }
@@ -32,13 +40,15 @@ class FlashlightService : Service() {
     private fun flashLight() {
         handler.post(object : Runnable {
             override fun run() {
-                if (isFlashing) {
-                    turnOffFlashlight()
-                } else {
-                    turnOnFlashlight()
+                if (isServiceActive) {
+                    if (isFlashing) {
+                        turnOffFlashlight()
+                    } else {
+                        turnOnFlashlight()
+                    }
+                    isFlashing = !isFlashing
+                    handler.postDelayed(this, 500) // 500ms delay between flashes
                 }
-                isFlashing = !isFlashing
-                handler.postDelayed(this, 500) // 500ms delay between flashes
             }
         })
     }

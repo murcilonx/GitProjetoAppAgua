@@ -137,22 +137,30 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra(AlarmClock.EXTRA_MESSAGE, getString(R.string.alarme_mensagem))
                 startActivity(intent)
 
-                    if (intent.resolveActivity(packageManager) != null){
-                        val alarmIntent = Intent(this, AlarmReceiver::class.java)
-                        val pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-                        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                        val calendar = Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, txt_hora.text.toString().toInt())
-                            set(Calendar.MINUTE, txt_minutos.text.toString().toInt())
-                            set(Calendar.SECOND, 0)
-                        }
-                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-
-
-                    }
-
             }
+
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            // Intent para iniciar a lanterna
+            val startIntent = Intent(this, AlarmReceiver::class.java).apply {
+                action = "com.example.projetoappagua.START_FLASHLIGHT"
+            }
+            val startPendingIntent = PendingIntent.getBroadcast(this, 0, startIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+            // Intent para parar a lanterna
+            val stopIntent = Intent(this, AlarmReceiver::class.java).apply {
+                action = "com.example.projetoappagua.STOP_FLASHLIGHT"
+            }
+            val stopPendingIntent = PendingIntent.getBroadcast(this, 1, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+            // Configurar o alarme para acionar o início da lanterna
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendario.timeInMillis, startPendingIntent)
+
+            // Configurar o alarme para parar a lanterna depois de um tempo (por exemplo, 10 minutos)
+            val stopTime = calendario.timeInMillis + 10 * 60 * 1000 // 10 minutos depois
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, stopTime, stopPendingIntent)
+
+
 
         }
 
@@ -160,10 +168,6 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-
-
-
-
 
 
 
