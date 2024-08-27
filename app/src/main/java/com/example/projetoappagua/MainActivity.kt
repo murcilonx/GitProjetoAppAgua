@@ -3,6 +3,8 @@ package com.example.projetoappagua
 import NotificationReceiver
 import android.annotation.SuppressLint
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
@@ -10,7 +12,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.SystemClock
 import android.provider.AlarmClock
 import android.widget.Button
 import android.widget.EditText
@@ -21,12 +22,14 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.projetoappagua.model.CalcularIngestaoDiaria
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
@@ -119,8 +122,6 @@ class MainActivity : AppCompatActivity() {
                 txt_hora.text = String.format("%02d" , hourOfDay)
                 txt_minutos.text = String.format("%02d", minutes)
 
-             //Calculo para agendar as notificações prévias ao alarme
-
                 val currentTime = Calendar.getInstance()
                 currentTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 currentTime.set(Calendar.MINUTE, minutes)
@@ -133,10 +134,12 @@ class MainActivity : AppCompatActivity() {
             //Agendar notificações
 
             if (delayMillis > 0){
-                scheduleNotification(this,5*60*1000) //5 minutos
-                scheduleNotification(this,10*60*1000) //10 minutos
-                scheduleNotification(this,15*60*1000) //15 minutos
-                scheduleNotification(this, 0*60*1000) //30 minutos
+
+                val notificationTimes = listOf(5*60*1000L, 10*60*1000L, 15*60*1000L, 30*60*1000L)
+                for (delay in notificationTimes){
+                    scheduleNotification(this, alarmTimeMillis-delay)
+                }
+
             } else{
                 Toast.makeText(this, "A hora definida ja passou", Toast.LENGTH_SHORT).show()
             }
@@ -166,13 +169,35 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun scheduleNotification(context: Context, delayMillis: Long) {
-        val intent = Intent(context, NotificationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT)
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val triggerAtMillis = SystemClock.elapsedRealtime() + delayMillis
-        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        @SuppressLint("ScheduleExactAlarm", "SuspiciousIndentation")
+        fun scheduleNotification (context: Context, triggerTimeMillis: Long) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationId = Random.nextInt(1000)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val channelId = "default_channel_id"
+            val channelName = "Default Channel"
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+
+        }
+
+        val notificationBuilder = NotificationCompat.Builder(context, "default_channel_id")
+            .setContentTitle("Lembrete de Hidratação")
+            .setContentText("A hora da hidratação está próxima")
+            .setSmallIcon(R.drawable.bebaagua)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+
+        val activityIntent = Intent(context, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(context, 0, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+            notificationBuilder.setContentIntent(pendingIntent)
+
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val notificationIntent = Intent(context, NotificationReceiver::class.java)
+        val pendingNotificationIntent = PendingIntent.getBroadcast(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT )
+
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMillis, pendingNotificationIntent)
     }
 
     @SuppressLint("CutPasteId")
