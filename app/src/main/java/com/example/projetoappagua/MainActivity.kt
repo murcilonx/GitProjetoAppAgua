@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.provider.AlarmClock
@@ -50,6 +52,11 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n", "DefaultLocale", "QueryPermissionsNeeded")
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+            }
+        }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -126,10 +133,10 @@ class MainActivity : AppCompatActivity() {
             //Agendar notificações
 
             if (delayMillis > 0){
-                scheduleNotification(this, 5*60*1000) //5 minutos
-                scheduleNotification(this, 10*60*1000) //10 minutos
-                scheduleNotification(this, 15*60*1000) //15 minutos
-                scheduleNotification(this, 30*60*1000) //30 minutos
+                scheduleNotification(this,5*60*1000) //5 minutos
+                scheduleNotification(this,10*60*1000) //10 minutos
+                scheduleNotification(this,15*60*1000) //15 minutos
+                scheduleNotification(this, 0*60*1000) //30 minutos
             } else{
                 Toast.makeText(this, "A hora definida ja passou", Toast.LENGTH_SHORT).show()
             }
@@ -164,7 +171,7 @@ class MainActivity : AppCompatActivity() {
         val pendingIntent = PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerAtMillis = SystemClock.elapsedRealtime() + delayMillis
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
 
     }
 
