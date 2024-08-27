@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">ProjetoAppAgua</string>
     <string name="hint_peso">Seu Peso (Kg)</string>
     <string name="hint_idade">Sua Idade</string>
@@ -13,4 +13,5 @@
     <string name="dialog_titulo">Redefinir dados</string>
     <string name="dialog_desc">Deseja excluir todos os dados existentes?</string>
     <string name="alarme_mensagem">Hora de beber água!</string>
+    <string name="beba_gua" tools:keep="@string/beba_gua">Beba Água!!!</string>
 </resources>
