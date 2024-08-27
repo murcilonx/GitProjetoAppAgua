@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package com.example.projetoappagua
 
 import NotificationReceiver
@@ -23,8 +25,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.projetoappagua.model.CalcularIngestaoDiaria
 import java.text.NumberFormat
 import java.util.Calendar
@@ -32,6 +32,9 @@ import java.util.Locale
 import kotlin.random.Random
 
 
+@Suppress(
+    "PrivatePropertyName"
+)
 class MainActivity : AppCompatActivity() {
 
     private lateinit var edit_peso: EditText
@@ -63,12 +66,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
 
-        }
+
         //supportActionBar!!.hide() -> crash do aplicativo
 
         IniciarComponentes()
@@ -174,10 +173,11 @@ class MainActivity : AppCompatActivity() {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationId = Random.nextInt(1000)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val channelId = "default_channel_id"
-            val channelName = "Default Channel"
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                val channelId = "default_channel_id"
+                val channelName = "Default Channel"
+                val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+                notificationManager.createNotificationChannel(channel)
 
         }
 
@@ -195,10 +195,21 @@ class MainActivity : AppCompatActivity() {
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val notificationIntent = Intent(context, NotificationReceiver::class.java)
-        val pendingNotificationIntent = PendingIntent.getBroadcast(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT )
+        val pendingNotificationIntent = PendingIntent.getBroadcast(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
 
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMillis, pendingNotificationIntent)
     }
+
+    private fun checkPermissions(){
+        if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.TIRAMISU){
+            val notificationPermission = checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+            if (notificationPermission != PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Permissão de notificações não concedida", Toast.LENGTH_SHORT).show()
+            }
+
+        }
+    }
+
 
     @SuppressLint("CutPasteId")
     fun IniciarComponentes(){
@@ -215,5 +226,7 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+
 
 }

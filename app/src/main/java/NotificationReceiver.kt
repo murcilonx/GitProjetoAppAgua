@@ -16,7 +16,7 @@ class NotificationReceiver : BroadcastReceiver(){
     override fun onReceive(context: Context, intent: Intent){
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "water_reminder_channel"
+        val channelId = "default_channel_id"
         val channelName = "Water Reminder Channel"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
